@@ -77,7 +77,7 @@ extern "C"
 #define digitalPinToInterrupt(P)   ( g_APinDescription[P].ulExtInt )
 
 // LEDs
-#define PIN_LED              PIN_A2
+#define PIN_LED              2
 #define LED_BUILTIN          PIN_LED
 
 /* Wi-Fi pins assignment */
@@ -156,9 +156,9 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 /*
  * USB
  */
-#define PIN_USB_HOST_ENABLE (27ul)
-#define PIN_USB_DM          (28ul)
-#define PIN_USB_DP          (29ul)
+#define PIN_USB_HOST_ENABLE (-1)
+#define PIN_USB_DM          (6ul)
+#define PIN_USB_DP          (7ul)
 
 #ifdef __cplusplus
 }
@@ -178,8 +178,6 @@ extern SERCOM sercom0;
 extern SERCOM sercom1;
 extern SERCOM sercom2;
 extern SERCOM sercom3;
-extern SERCOM sercom4;
-extern SERCOM sercom5;
 
 extern Uart Serial;
 extern Uart Serial1;
