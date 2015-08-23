@@ -93,10 +93,22 @@ void SystemInit( void )
     /* Wait for synchronization */
   }
 
+  ///* ----------------------------------------------------------------------------------------------
+   //* 3) Put Generic Clock Generator 1 as source for Generic Clock Multiplexer 0 (DFLL48M reference)
+   //*/
+  //GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID( GENERIC_CLOCK_MULTIPLEXER_DFLL48M ) | // Generic Clock Multiplexer 0
+                      //GCLK_CLKCTRL_GEN_GCLK1 | // Generic Clock Generator 1 is source
+                      //GCLK_CLKCTRL_CLKEN ;
+//
+  //while ( GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY )
+  //{
+    ///* Wait for synchronization */
+  //}
+
   /* ----------------------------------------------------------------------------------------------
-   * 3) Put Generic Clock Generator 1 as source for Generic Clock Multiplexer 0 (DFLL48M reference)
+   * 3) Put Generic Clock Generator 1 as source for Generic Clock Multiplexer 0 (DPLL96M reference)
    */
-  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID( GENERIC_CLOCK_MULTIPLEXER_DFLL48M ) | // Generic Clock Multiplexer 0
+  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID( GENERIC_CLOCK_GENERATOR_MAIN ) | // Generic Clock Multiplexer 0
                       GCLK_CLKCTRL_GEN_GCLK1 | // Generic Clock Generator 1 is source
                       GCLK_CLKCTRL_CLKEN ;
 
@@ -105,52 +117,57 @@ void SystemInit( void )
     /* Wait for synchronization */
   }
 
+  ///* ----------------------------------------------------------------------------------------------
+   //* 4) Enable DFLL48M clock
+   //*/
+//
+  ///* DFLL Configuration in Closed Loop mode, cf product datasheet chapter 15.6.7.1 - Closed-Loop Operation */
+//
+  ///* Remove the OnDemand mode, Bug http://avr32.icgroup.norway.atmel.com/bugzilla/show_bug.cgi?id=9905 */
+  //SYSCTRL->DFLLCTRL.bit.ONDEMAND = 0 ;
+//
+  //while ( (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0 )
+  //{
+    ///* Wait for synchronization */
+  //}
+
   /* ----------------------------------------------------------------------------------------------
    * 4) Enable DFLL48M clock
    */
 
-  /* DFLL Configuration in Closed Loop mode, cf product datasheet chapter 15.6.7.1 - Closed-Loop Operation */
+  /* DPLL Configuration */
 
-  /* Remove the OnDemand mode, Bug http://avr32.icgroup.norway.atmel.com/bugzilla/show_bug.cgi?id=9905 */
-  SYSCTRL->DFLLCTRL.bit.ONDEMAND = 0 ;
+	uint32_t tmpldr;
+	uint8_t  tmpldrfrac;
+	uint32_t refclk;
 
-  while ( (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0 )
-  {
-    /* Wait for synchronization */
-  }
+	/* Calculate LDRFRAC and LDR */
+	tmpldr = (48000000 << 4) / VARIANT_MCK;
+	tmpldrfrac = tmpldr & 0x0f;
+	tmpldr = (tmpldr >> 4) - 1;
 
-  SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_CSTEP( 31 ) | // Coarse step is 31, half of the max value
-                         SYSCTRL_DFLLMUL_FSTEP( 511 ) | // Fine step is 511, half of the max value
-                         SYSCTRL_DFLLMUL_MUL( (VARIANT_MCK/VARIANT_MAINOSC) ) ; // External 32KHz is the reference
+	SYSCTRL->DPLLCTRLA.reg =
+			(0 << SYSCTRL_DPLLCTRLA_ONDEMAND_Pos) |
+			(0 << SYSCTRL_DPLLCTRLA_RUNSTDBY_Pos);
 
-  while ( (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0 )
-  {
-    /* Wait for synchronization */
-  }
+	SYSCTRL->DPLLRATIO.reg =
+			SYSCTRL_DPLLRATIO_LDRFRAC(tmpldrfrac) |
+			SYSCTRL_DPLLRATIO_LDR(tmpldr);
 
-  /* Write full configuration to DFLL control register */
-  SYSCTRL->DFLLCTRL.reg |= SYSCTRL_DFLLCTRL_MODE | /* Enable the closed loop mode */
-                           SYSCTRL_DFLLCTRL_WAITLOCK |
-                           SYSCTRL_DFLLCTRL_QLDIS ; /* Disable Quick lock */
-
-  while ( (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0 )
-  {
-    /* Wait for synchronization */
-  }
-
-  /* Enable the DFLL */
-  SYSCTRL->DFLLCTRL.reg |= SYSCTRL_DFLLCTRL_ENABLE ;
-
-  while ( (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLLCKC) == 0 ||
-          (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLLCKF) == 0 )
-  {
-    /* Wait for locks flags */
-  }
-
-  while ( (SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0 )
-  {
-    /* Wait for synchronization */
-  }
+	SYSCTRL->DPLLCTRLB.reg =
+			SYSCTRL_DPLLCTRLB_DIV(1) |
+			(0 << SYSCTRL_DPLLCTRLB_LBYPASS_Pos) |
+			SYSCTRL_DPLLCTRLB_LTIME(0) |
+			SYSCTRL_DPLLCTRLB_REFCLK(0x2) |
+			(0 << SYSCTRL_DPLLCTRLB_WUF_Pos) |
+			(0 << SYSCTRL_DPLLCTRLB_LPEN_Pos) |
+			SYSCTRL_DPLLCTRLB_FILTER(0);
+	
+	while((SYSCTRL->DPLLSTATUS.reg & (SYSCTRL_DPLLSTATUS_CLKRDY | SYSCTRL_DPLLSTATUS_LOCK)) ==
+			(SYSCTRL_DPLLSTATUS_CLKRDY | SYSCTRL_DPLLSTATUS_LOCK))
+	{
+		/*wait*/
+	}
 
   /* ----------------------------------------------------------------------------------------------
    * 5) Switch Generic Clock Generator 0 to DFLL48M. CPU will run at 48MHz.
