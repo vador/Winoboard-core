@@ -89,7 +89,7 @@ recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DF_CPU=
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{build.path}/{archive_file}" "{object_file}"
 
 ## Combine gc-sections, archives, and objects
-recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nano.specs --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--start-group -lm "{build.path}/{archive_file}" -Wl,--end-group
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" -Wl,--section-start=.text=0x2000 --specs=nano.specs --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--start-group -lm "{build.path}/{archive_file}" -Wl,--end-group
 
 ## Create output (bin file)
 recipe.objcopy.bin.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
@@ -109,35 +109,12 @@ recipe.size.regex=\.text\s+([0-9]+).*
 #
 # BOSSA
 #
-tools.bossac.path={runtime.tools.bossac-1.6-arduino.path}
-tools.bossac.cmd=bossac
-tools.bossac.cmd.windows=bossac.exe
+tools.bossa_wino.cmd=bossa_wino
+tools.bossa_wino.cmd.windows=bossa_wino.exe
+tools.bossa_wino.path={runtime.ide.path}/hardware/tools
 
-tools.bossac.upload.params.verbose=-i -d
-tools.bossac.upload.params.quiet=
-tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U {upload.native_usb} -i -e -w -v "{build.path}/{build.project_name}.bin" -R
+tools.bossa_wino.upload.params.verbose=-i -d
+tools.bossa_wino.upload.params.quiet=
+tools.bossa_wino.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U {upload.native_usb} -i -e -w -v "{build.path}/{build.project_name}.bin" -R
 
-#
-# OpenOCD sketch upload
-#
-
-tools.openocd.path={runtime.tools.openocd.path}
-tools.openocd.cmd=bin/openocd
-tools.openocd.cmd.windows=bin/openocd.exe
-
-tools.openocd.upload.params.verbose=-d2
-tools.openocd.upload.params.quiet=-d0
-tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{{build.path}/{build.project_name}.bin}} verify reset 0x00002000; shutdown"
-
-tools.openocd.program.params.verbose=-d2
-tools.openocd.program.params.quiet=-d0
-tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{{build.path}/{build.project_name}.elf}} verify reset; shutdown"
-
-tools.openocd.erase.params.verbose=-d3
-tools.openocd.erase.params.quiet=-d0
-tools.openocd.erase.pattern=
-
-tools.openocd.bootloader.params.verbose=-d2
-tools.openocd.bootloader.params.quiet=-d0
-tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{{runtime.platform.path}/bootloaders/{bootloader.file}}} verify reset; shutdown"
 
