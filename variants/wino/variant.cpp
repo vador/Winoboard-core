@@ -43,8 +43,8 @@ const PinDescription g_APinDescription[]=
   { PORTA, 28, PIO_TIMER, (PIN_ATTR_DIGITAL), No_ADC_Channel, NOT_ON_PWM, NOT_ON_TIMER, EXTERNAL_INT_8 },
   { PORTA, 30, PIO_TIMER, (PIN_ATTR_DIGITAL), No_ADC_Channel, NOT_ON_PWM, NOT_ON_TIMER, EXTERNAL_INT_10 },
   { PORTA, 31, PIO_TIMER, (PIN_ATTR_DIGITAL), No_ADC_Channel, NOT_ON_PWM, NOT_ON_TIMER, EXTERNAL_INT_11 },
-  // 12/13 Wifi gpio (not a uC output)
-  { PORTA, 15, PIO_OUTPUT, (PIN_ATTR_DIGITAL), No_ADC_Channel, NOT_ON_PWM, NOT_ON_TIMER, EXTERNAL_INT_NONE },// D12 - wifi falsh
+  // 12/13 Wifi control
+  { PORTA, 15, PIO_OUTPUT, (PIN_ATTR_DIGITAL), No_ADC_Channel, NOT_ON_PWM, NOT_ON_TIMER, EXTERNAL_INT_NONE },// D12 - wifi flash
   { PORTA, 14, PIO_OUTPUT, (PIN_ATTR_DIGITAL), No_ADC_Channel, NOT_ON_PWM, NOT_ON_TIMER, EXTERNAL_INT_NONE },// D13 - wifi enable
 
   // 14..22 - Analog pins
