@@ -84,7 +84,7 @@ extern "C"
 //#define WIFI_GPIO_0_PIN		(12ul)
 //#define WIFI_GPIO_2_PIN		(13ul)
 #define WIFI_FLASH_PIN		(12ul)
-#define WIFI_EN_PIN			(13ul)
+#define WIFI_EN_PIN			(23ul)
 //#define WIFI_WAKEUP_PIN		(24ul)
 //#define WIFI_RESET_PIN		(25ul)
 
