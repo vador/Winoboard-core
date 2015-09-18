@@ -1,4 +1,4 @@
-wino_dbg.name=Wino (DEBUG port or external FTDI)
+wino_dbg.name=Winoboard (DEBUG port or external FTDI)
 wino_dbg.vid.0=0x03eb
 wino_dbg.pid.0=0x6124
 wino_dbg.upload.tool=bossa_wino
@@ -20,7 +20,7 @@ wino_dbg.build.variant_system_lib=
 wino_dbg.build.vid=0x03eb
 wino_dbg.build.pid=0x6124
 
-wino.name=Wino (HOST port)
+wino.name=Winoboard (HOST port)
 wino.vid.0=0x03eb
 wino.pid.0=0x6124
 wino.upload.tool=bossa_wino
